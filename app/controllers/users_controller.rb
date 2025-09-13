@@ -11,7 +11,7 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      # セッションのリセット
+      # セッションハイジャック対策
       unless Current.session.nil?
         terminate_session
       end
