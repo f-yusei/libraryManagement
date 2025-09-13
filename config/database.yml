@@ -25,6 +25,4 @@ test:
 # is mounted as a persistent Docker volume in config/deploy.yml.
 production:
   <<: *default
-  adapter: postgresql
-  encoding: unicode
   url: <%= ENV['DATABASE_URL'] %>
