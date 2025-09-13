@@ -1,0 +1,13 @@
+<%# Summary alert for form-level errors; per-field errors are displayed next to inputs %>
+<% if local_assigns[:object] && object.errors.any? %>
+  <div id="error_explanation" class="mb-3">
+    <div class="alert alert-danger" role="alert">
+      <strong><%= pluralize(object.errors.count, "error") %> prohibited this form from being saved:</strong>
+      <ul class="mb-0 mt-2">
+      <% object.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>
