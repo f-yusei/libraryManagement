@@ -19,7 +19,7 @@ class UsersController < ApplicationController
       flash[:success] = "ユーザー登録が完了しました"
       redirect_to @user
     else
-      render "new", status: :unprocessable_content
+      render "new", status: :unprocessable_entity
     end
   end
 

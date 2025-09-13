@@ -7,6 +7,9 @@
   --content-max-width: 960px;
   /* Soft primary color (overrides Bootstrap's default) */
   --bs-primary: #9fd3ff;
+  /* Standard danger color (Bootstrap default) */
+  --bs-danger: #dc3545;
+  --bs-danger-rgb: 220,53,69;
 }
 
 html, body {
@@ -54,4 +57,19 @@ textarea {
 @media (max-width: 576px) {
   body { padding-top: 56px; }
   .main-container { padding-left: .75rem; padding-right: .75rem; }
+}
+
+//form
+#error_explanation {
+  color: var(--bs-danger);
+  ul {
+    color: var(--bs-danger);
+    margin: 0 0 30px 0;
+  }
+}
+
+.field_with_errors {
+  .form-control {
+  color: var(--bs-danger);
+  }
 }
