@@ -22,7 +22,7 @@
                     <% end %>
 
                     <dt class="col-sm-3">在庫</dt>
-                    <dd class="col-sm-9"><%= "#{@book.stock_count}冊" %></dd>
+                    <dd class="col-sm-9"><%= @book.stock_count.to_i > 0 ? "#{@book.stock_count}冊" : '在庫なし' %></dd>
                 </dl>
             </div>
         <% else %>
