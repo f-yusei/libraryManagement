@@ -73,3 +73,9 @@ textarea {
   color: var(--bs-danger);
   }
 }
+
+.card a,
+.main-container a {
+  color: inherit;
+  text-decoration: none;
+}
