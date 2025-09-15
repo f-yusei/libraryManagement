@@ -1,15 +1,13 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+one:
+  title: "Ruby入門"
+  isbn: "9784123456011"
+  published_year: 2024-04-01
+  publisher: "技術評論社"
+  stock_count: 1
 
-# one:
-#   title: MyString
-#   isbn: MyString
-#   published_year: 2025-09-13
-#   publisher: MyString
-#   stock_count: 1
-
-# two:
-#   title: MyString
-#   isbn: MyString
-#   published_year: 2025-09-13
-#   publisher: MyString
-#   stock_count: 1
+two:
+  title: "Rails実践ガイド"
+  isbn: "9784123456028"
+  published_year: 2023-07-15
+  publisher: "オライリージャパン"
+  stock_count: 0
