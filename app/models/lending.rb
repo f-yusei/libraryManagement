@@ -13,4 +13,11 @@ class Lending < ApplicationRecord
       end
     end
   end
+
+  def return!
+    transaction do
+      book.increment!(:stock_count)
+      update!(returned_at: Time.current)
+    end
+  end
 end
