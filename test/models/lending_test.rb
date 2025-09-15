@@ -1,8 +1,10 @@
 require "test_helper"
+
 class LendingTest < ActiveSupport::TestCase
   setup do
     @user = users(:one)
     @book = books(:one)
+    @lending = lendings(:one)
   end
 
   test "should lend book to user" do
@@ -14,10 +16,17 @@ class LendingTest < ActiveSupport::TestCase
     end
   end
 
-  test "should raise out of stock error" do
+  test "should not allow lending when out of stock" do
     @book.update!(stock_count: 0)
     assert_raises Lending::OutOfStockError do
       Lending.lend_to(@user, @book)
     end
+  end
+
+  test "should allow user to return book" do
+    assert_equal 1, @book.reload.stock_count
+    @lending.return!
+    assert_not_nil @lending.reload.returned_at
+    assert_equal 2, @book.reload.stock_count
   end
 end
