@@ -1,6 +1,10 @@
 <div class="container mt-4">
     <div class="row g-3">
         <% if @books.present? %>
+            <%= form_with url: books_path, method: :get, local: true, class: "d-flex mb-3" do |f| %>
+            <%= f.text_field :q, value: params[:q], class: "form-control me-2", placeholder: "タイトル・ISBN・著者名で検索" %>
+            <%= f.submit "検索", class: "btn btn-primary" %>
+            <% end %>
             <% @books.each do |book| %>
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card h-100">
