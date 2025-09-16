@@ -1,0 +1,59 @@
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">書籍登録</h3>
+                </div>
+                <div class="card-body">
+                    <%= form_with(model: @book, local: true) do |form| %>
+                        <% if @book.errors.any? %>
+                            <div class="alert alert-danger">
+                                <h4><%= pluralize(@book.errors.count, "error") %> prohibited this book from being saved:</h4>
+                                <ul>
+                                    <% @book.errors.full_messages.each do |message| %>
+                                        <li><%= message %></li>
+                                    <% end %>
+                                </ul>
+                            </div>
+                        <% end %>
+
+                        <div class="mb-3">
+                            <%= form.label :title, "タイトル", class: "form-label" %>
+                            <%= form.text_field :title, class: "form-control", required: true %>
+                        </div>
+
+                        <div class="mb-3">
+                            <%= form.label :author_names, "著者名（カンマ区切り）" %>
+                            <%= form.text_field :author_names, class: "form-control", placeholder: "例: 夏目漱石, 太宰治" %>
+                        </div>
+
+                        <div class="mb-3">
+                            <%= form.label :publisher, "出版社", class: "form-label" %>
+                            <%= form.text_field :publisher, class: "form-control" %>
+                        </div>
+
+                        <div class="mb-3">
+                            <%= form.label :published_year, "出版年", class: "form-label" %>
+                            <%= form.date_field :published_year, class: "form-control" %>
+                        </div>
+
+                        <div class="mb-3">
+                            <%= form.label :isbn, "ISBN", class: "form-label" %>
+                            <%= form.text_field :isbn, class: "form-control", required: true %>
+                        </div>
+
+                        <div class="mb-3">
+                            <%= form.label :stock_count, "在庫数", class: "form-label" %>
+                            <%= form.number_field :stock_count, class: "form-control", min: 0, value: 1 %>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <%= form.submit "登録", class: "btn btn-primary" %>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

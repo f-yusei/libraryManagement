@@ -1,10 +1,10 @@
 <div class="container mt-4">
     <div class="row g-3">
+        <%= form_with url: books_path, method: :get, local: true, class: "d-flex mb-3" do |f| %>
+        <%= f.text_field :q, value: params[:q], class: "form-control me-2", placeholder: "タイトル・ISBN・著者名で検索" %>
+        <%= f.submit "検索", class: "btn btn-primary" %>
+        <% end %>
         <% if @books.present? %>
-            <%= form_with url: books_path, method: :get, local: true, class: "d-flex mb-3" do |f| %>
-            <%= f.text_field :q, value: params[:q], class: "form-control me-2", placeholder: "タイトル・ISBN・著者名で検索" %>
-            <%= f.submit "検索", class: "btn btn-primary" %>
-            <% end %>
             <% @books.each do |book| %>
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card h-100">
@@ -27,7 +27,10 @@
             <% end %>
         <% else %>
             <div class="col-12">
-                <div class="alert alert-info">No books found.</div>
+                <div class="alert alert-info text-center">
+                    <h5 class="mb-2">書籍が見つかりませんでした。</h5>
+                    <p class="mb-0 text-muted">検索条件を変更して再度お試しください。</p>
+                </div>
             </div>
         <% end %>
     </div>
