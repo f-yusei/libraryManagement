@@ -14,9 +14,9 @@ module Authentication
 
   private
     def current_user
-      nil unless authenticated?
+      return nil unless authenticated?
 
-      @current_user ||= Session.find_by(id: session.id)&.user
+      @current_user ||= Current.session&.user
     end
 
     def authenticated?

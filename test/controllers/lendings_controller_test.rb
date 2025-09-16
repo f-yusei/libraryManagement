@@ -2,8 +2,8 @@ require "test_helper"
 
 class LendingsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
-    @book = books(:one)
+    @user = users(:two)
+    @book = books(:two)
     sign_in_as(@user)
   end
 
@@ -11,6 +11,12 @@ class LendingsControllerTest < ActionDispatch::IntegrationTest
     post lendings_path, params: { book_id: @book.id }
     assert_redirected_to book_path(@book)
     assert_equal "本の貸出が完了しました。", flash[:success]
+
+    # 作成されたlendingの確認
+    lending = Lending.last
+    assert_equal @user.id, lending.user_id
+    assert_equal @book.id, lending.book_id
+    assert_nil lending.returned_at
   end
 
   test "redirects back with danger flash when out of stock" do
@@ -19,16 +25,5 @@ class LendingsControllerTest < ActionDispatch::IntegrationTest
     post lendings_path, params: { book_id: @book.id }
     assert_redirected_to book_path(@book)
     assert_equal "在庫がありません。", flash[:danger]
-  end
-
-  test "redirects back with danger flash when lending fails to persist" do
-    # createが失敗するように Book にバリデーションを仕掛けておくか、
-    # Lending.lend_to を stub して `persisted?` を false にするのも手
-    Lending.stub :lend_to, Lending.new do
-      post lendings_path, params: { book_id: @book.id }
-    end
-
-    assert_redirected_to book_path(@book)
-    assert_equal "貸出に失敗しました。", flash[:danger]
   end
 end

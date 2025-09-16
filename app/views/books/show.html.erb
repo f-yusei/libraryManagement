@@ -24,6 +24,22 @@
                     <dt class="col-sm-3">在庫</dt>
                     <dd class="col-sm-9"><%= @book.stock_count.to_i > 0 ? "#{@book.stock_count}冊" : '在庫なし' %></dd>
                 </dl>
+
+                <div class="mt-4 d-flex">
+                    <%= link_to '戻る', books_path, class: "btn btn-secondary me-2" %>
+
+                    <% if current_user&.lendings&.unreturned&.exists?(book_id: @book.id) %>
+                        <%= button_to '返却する',
+                                    lending_path(current_user.lendings.unreturned.find_by(book_id: @book.id)),
+                                    method: :delete,
+                                    class: "btn btn-danger" %>
+                    <% elsif @book.stock_count.to_i > 0 %>
+                        <%= button_to '借りる',
+                                    lendings_path(book_id: @book.id),
+                                    method: :post,
+                                    class: "btn btn-primary" %>
+                    <% end %>
+                </div>
             </div>
         <% else %>
             <div class="col-12">

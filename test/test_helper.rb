@@ -17,7 +17,7 @@ end
 module AuthenticationHelpers
   # リダイレクトを追跡する場合は `follow: true` を指定する
   def sign_in_as(user, password: "password", follow: false)
-    post sessions_path, params: { email_address: user.email_address || user.email, password: password }
+    post session_path, params: { email_address: user.email_address, password: password }
     assert_response :redirect if respond_to?(:assert_response)
 
     if follow
@@ -25,6 +25,8 @@ module AuthenticationHelpers
       assert_response :success
     end
   end
+
+
 
   def sign_out
     delete session_path(:current) rescue delete session_path

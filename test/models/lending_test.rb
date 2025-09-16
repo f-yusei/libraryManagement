@@ -4,7 +4,7 @@ class LendingTest < ActiveSupport::TestCase
   setup do
     @user = users(:one)
     @book = books(:one)
-    @lending = lendings(:one)
+    @lending = lendings(:not_returned)
   end
 
   test "should lend book to user" do
