@@ -6,6 +6,9 @@ class Book < ApplicationRecord
   has_many :users, through: :lendings
   before_validation :strip_isbn_hyphens
 
+  validates :title, presence: true
+  validates :isbn, presence: true, uniqueness: true
+
   scope :search, ->(query) {
     return all.preload(:authors) if query.blank?
 
