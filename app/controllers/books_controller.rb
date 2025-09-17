@@ -20,12 +20,12 @@ class BooksController < ApplicationController
     Book.transaction do
       @book = Book.new(book_params)
       # ここで著者がパラメータに含まれていなかった時点でunprocessable_entityを返す
-      if @book.author_names.blank?
+      if params[:author_names].blank?
         @book.errors.add(:authors, "を入力してください")
         render :new, status: :unprocessable_entity
         return
       end
-      @book.author_names.split(",").map(&:strip).each do |name|
+      params[:author_names].split(",").map(&:strip).each do |name|
         author = Author.find_or_create_by!(name: name)
         @book.authors << author
       end

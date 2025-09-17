@@ -1,5 +1,4 @@
 class Book < ApplicationRecord
-  attr_accessor :author_names
   has_many :book_authors, dependent: :destroy
   has_many :authors, through: :book_authors
 
@@ -9,7 +8,6 @@ class Book < ApplicationRecord
 
   validates :title, presence: true
   validates :isbn, presence: true, uniqueness: true
-  validates :author_names, presence: true
 
   scope :search, ->(query) {
     return all.preload(:authors) if query.blank?
