@@ -23,10 +23,5 @@ module LibraryManagement
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-    config.after_initialize do
-      if Rails.env.production?
-        Rails.application.load_seed
-      end
-    end
   end
 end
