@@ -17,30 +17,32 @@ class BooksController < ApplicationController
   end
 
   def create
-    Book.transaction do
       @book = Book.new(book_params)
-      # ここで著者がパラメータに含まれていなかった時点でunprocessable_entityを返す
-      if params[:author_names].blank?
+
+      raw = params[:author_names].to_s
+      names = raw.split(",").map { |s| s.strip }.reject(&:blank?).uniq
+
+      if names.empty?
         @book.errors.add(:authors, "を入力してください")
         render :new, status: :unprocessable_entity
         return
       end
-      params[:author_names].split(",").map(&:strip).each do |name|
-        author = Author.find_or_create_by!(name: name)
-        @book.authors << author
+
+      ActiveRecord::Base.transaction do
+        @book.save!
+        authors = names.map { |name| Author.find_or_create_by!(name: name) }
+        @book.authors << authors
       end
 
-      if @book.save
-        redirect_to @book, flash: { success: "本の登録が完了しました。" }
-      else
-        render :new, status: :unprocessable_entity
-      end
-    end
+      redirect_to @book, flash: { success: "本の登録が完了しました。" }
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
+      flash.now[:alert] = "登録に失敗しました。 #{e.message}"
+      render :new, status: :unprocessable_entity
   end
 
   private
 
   def book_params
-    params.require(:book).permit(:title, :isbn, :published_year, :publisher, :stock_count, :author_names)
+    params.require(:book).permit(:title, :isbn, :published_year, :publisher, :stock_count)
   end
 end
