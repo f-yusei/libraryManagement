@@ -1,42 +1,22 @@
-# # Users
-# alice = User.find_or_create_by!(email_address: "alice@example.com") do |user|
-#   user.name = "Alice"
-#   user.password = "password"
-#   user.password_confirmation = "password"
-#   user.admin = true
-# end
 
-# bob = User.find_or_create_by!(email_address: "bob@example.com") do |user|
-#   user.name = "Bob"
-#   user.password = "password"
-#   user.password_confirmation = "password"
-#   user.admin = false
-# end
+if (existing_admin = User.find_by(admin: true))
+  puts "Initial admin already exists: #{existing_admin.email_address}"
+else
+  admin_email = ENV.fetch("INITIAL_ADMIN_EMAIL", "admin@example.com")
+  admin_name = ENV.fetch("INITIAL_ADMIN_NAME", "Initial Admin")
+  admin_password = ENV.fetch("INITIAL_ADMIN_PASSWORD", "password")
 
-# carol = User.find_or_create_by!(email_address: "carol@example.com") do |user|
-#   user.name = "Carol"
-#   user.password = "password"
-#   user.password_confirmation = "password"
-#   user.admin = false
-# end
+  admin = User.find_or_initialize_by(email_address: admin_email)
+  was_new_record = admin.new_record?
 
-# # Authors
-# natsume = Author.find_or_create_by!(name: "夏目漱石")
-# dazai   = Author.find_or_create_by!(name: "太宰治")
+  admin.name = admin_name if admin.name.blank?
+  admin.admin = true
 
-# # Books
-# book1 = Book.find_or_create_by!(isbn: "9781234567890") do |book|
-#   book.title = "吾輩は猫である"
-#   book.publisher = "岩波書店"
-#   book.published_year = Date.new(1905, 1, 1)
-#   book.stock_count = 3
-# end
-# book1.authors << natsume unless book1.authors.include?(natsume)
+  if was_new_record || admin.password_digest.blank?
+    admin.password = admin_password
+    admin.password_confirmation = admin_password
+  end
 
-# book2 = Book.find_or_create_by!(isbn: "9789876543210") do |book|
-#   book.title = "人間失格"
-#   book.publisher = "新潮社"
-#   book.published_year = Date.new(1948, 1, 1)
-#   book.stock_count = 2
-# end
-# book2.authors << dazai unless book2.authors.include?(dazai)
+  admin.save!
+  puts "#{was_new_record ? 'Created' : 'Updated'} initial admin user: #{admin.email_address}"
+end
