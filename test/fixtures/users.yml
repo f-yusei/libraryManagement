@@ -9,3 +9,9 @@ two:
   name: two
   email_address: two@example.com
   password_digest: <%= password_digest %>
+
+admin:
+  name: Admin User
+  email_address: admin@example.com
+  password_digest: <%= password_digest %>
+  admin: true
