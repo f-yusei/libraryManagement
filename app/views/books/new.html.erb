@@ -29,8 +29,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <%= label_tag :author_names, "著者名（カンマ区切り）", class: "form-label" %>
-                            <%= text_field_tag :author_names, nil, class: "form-control", placeholder: "例: 夏目漱石, 太宰治" %>
+                            <%= form.label :author_names, "著者名（カンマ区切り）" %>
+                            <%= text_field_tag :author_names, params[:author_names], class: "form-control", placeholder: "例: 夏目漱石, 太宰治" %>
                         </div>
 
                         <div class="mb-3">

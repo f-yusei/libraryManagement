@@ -1,5 +1,6 @@
 class BooksController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
+  admin_only only: %i[create new]
   def index
     @books = Book.search(params[:q])
   end
