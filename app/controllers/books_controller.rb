@@ -1,6 +1,6 @@
 class BooksController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
-  admin_only only: %i[create new]
+  admin_only only: %i[create new destroy]
   def index
     @books = Book.search(params[:q])
   end
@@ -18,27 +18,24 @@ class BooksController < ApplicationController
   end
 
   def create
-      @book = Book.new(book_params)
+    @book = Book.new(book_params)
+    @book.assign_authors_from_string(params[:author_names])
 
-      raw = params[:author_names].to_s
-      names = raw.split(",").map { |s| s.strip }.reject(&:blank?).uniq
-
-      if names.empty?
-        @book.errors.add(:authors, "を入力してください")
-        render :new, status: :unprocessable_entity
-        return
-      end
-
-      ActiveRecord::Base.transaction do
-        @book.save!
-        authors = names.map { |name| Author.find_or_create_by!(name: name) }
-        @book.authors << authors
-      end
-
+    if @book.save
       redirect_to @book, flash: { success: "本の登録が完了しました。" }
-  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
-      flash.now[:alert] = "登録に失敗しました。 #{e.message}"
+    else
       render :new, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    book = Book.find(params[:id])
+
+    if book.destroy
+      redirect_to root_path, flash: { success: "本の削除が完了しました。" }
+    else
+      redirect_to root_path, flash: { danger: book.errors.full_messages.join(", ") }
+    end
   end
 
   private
