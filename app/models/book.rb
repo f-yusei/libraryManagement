@@ -12,7 +12,7 @@ class Book < ApplicationRecord
   validates :title, presence: true
   validates :isbn, presence: true, uniqueness: true
 
-  # シンプルなバリデーション：保存時に著者が存在するかチェック
+  # 保存時に著者が存在するかチェック
   validate :must_have_authors_on_save
 
   attr_accessor :author_names_string, :tag_names_string

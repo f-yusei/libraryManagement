@@ -35,11 +35,11 @@
                     <% if @book.tags.any? %>
                         <dt class="col-sm-3">タグ</dt>
                         <dd class="col-sm-9">
-                            <ul class="list-unstyled mb-0">
+                            <div class="d-flex flex-wrap gap-2">
                                 <% @book.tags.each do |tag| %>
-                                    <li><%= tag.name %></li>
+                                    <span class="badge bg-secondary py-2 px-3"><%= tag.name %></span>
                                 <% end %>
-                            </ul>
+                            </div>
                         </dd>
                     <% end %>
 
