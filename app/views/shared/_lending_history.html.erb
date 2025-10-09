@@ -1,0 +1,71 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="h5 mb-0">
+      <i class="bi bi-clock-history me-2"></i>
+      <%= show_user_info ? "貸出履歴（全ユーザー）" : "貸出履歴" %>
+    </h3>
+  </div>
+  <div class="card-body">
+    <% if lendings.any? %>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <% if show_user_info %>
+                <th scope="col">ユーザー</th>
+              <% end %>
+              <th scope="col">書籍タイトル</th>
+              <th scope="col">貸出日</th>
+              <th scope="col">返却予定日</th>
+              <th scope="col">返却日</th>
+              <th scope="col">状態</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% lendings.order(created_at: :desc).each do |lending| %>
+              <tr class="<%= 'table-warning' if lending.returned_at.nil? %>">
+                <% if show_user_info %>
+                  <td>
+                    <%= link_to lending.user.name, lending.user, class: "text-decoration-none" %>
+                    <br>
+                    <small class="text-muted"><%= lending.user.email_address %></small>
+                  </td>
+                <% end %>
+                <td>
+                  <%= link_to lending.book.title, lending.book, class: "text-decoration-none" %>
+                </td>
+                <td><%= lending.checked_out_at.strftime("%Y/%m/%d") %></td>
+                <td>
+                  <%= lending.due_date.strftime("%Y/%m/%d") %>
+                  <% if lending.returned_at.nil? && lending.due_date < Date.current %>
+                    <span class="badge bg-danger ms-1">延滞</span>
+                  <% end %>
+                </td>
+                <td>
+                  <%= lending.returned_at ? lending.returned_at.strftime("%Y/%m/%d") : '-' %>
+                </td>
+                <td>
+                  <% if lending.returned_at %>
+                    <span class="badge bg-success">返却済み</span>
+                  <% else %>
+                    <span class="badge bg-warning text-dark">貸出中</span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-5">
+        <i class="bi bi-book display-4 text-muted"></i>
+        <p class="text-muted mt-3">
+          <%= show_user_info ? "まだ貸出履歴がありません。" : "まだ貸出履歴がありません。" %>
+        </p>
+        <% unless show_user_info %>
+          <%= link_to "本を探す", books_path, class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
