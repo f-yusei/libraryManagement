@@ -18,27 +18,17 @@ class BooksController < ApplicationController
   end
 
   def create
-      @book = Book.new(book_params)
+    @book = Book.new(book_params)
 
-      raw = params[:author_names].to_s
-      names = raw.split(",").map { |s| s.strip }.reject(&:blank?).uniq
+    # 個別に設定
+    @book.assign_authors(params[:author_names]) if params[:author_names].present?
+    @book.assign_tags(params[:tag_names]) if params[:tag_names].present?
 
-      if names.empty?
-        @book.errors.add(:authors, "を入力してください")
-        render :new, status: :unprocessable_entity
-        return
-      end
-
-      ActiveRecord::Base.transaction do
-        @book.save!
-        authors = names.map { |name| Author.find_or_create_by!(name: name) }
-        @book.authors << authors
-      end
-
+    if @book.save
       redirect_to @book, flash: { success: "本の登録が完了しました。" }
-  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
-      flash.now[:alert] = "登録に失敗しました。 #{e.message}"
+    else
       render :new, status: :unprocessable_entity
+    end
   end
 
   def destroy

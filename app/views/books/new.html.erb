@@ -41,7 +41,12 @@
                         <div class="mb-3">
                             <%= form.label :published_year, "出版年", class: "form-label" %>
                             <%= form.date_field :published_year, class: "form-control" %>
-                        </div>                        
+                        </div>
+
+                        <div class="mb-3">
+                            <%= form.label :tag_names, "タグ名（カンマ区切り）" %>
+                            <%= text_field_tag :tag_names, params[:tag_names], class: "form-control", placeholder: "例: 小説, 文学" %>
+                        </div>
 
                         <div class="mb-3">
                             <%= form.label :stock_count, "在庫数", class: "form-label" %>
