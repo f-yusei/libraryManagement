@@ -42,7 +42,12 @@ class BooksController < ApplicationController
   end
 
   def destroy
-    book = Book.find(params[:id])
+    book = Book.find_by(id: params[:id])
+
+    if book.nil?
+      redirect_to root_path, flash: { danger: "本が見つかりません" }
+      return
+    end
 
     if book.destroy
       redirect_to root_path, flash: { success: "本の削除が完了しました。" }

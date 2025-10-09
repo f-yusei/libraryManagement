@@ -10,7 +10,7 @@
                                     method: :delete,
                                     class: "btn btn-danger btn-sm",
                                     data: { 
-                                        "turbo-confirm": "本当に「#{@book.title}」を削除しますか？この操作は取り消せません。" 
+                                        "turbo-confirm": "本当に「#{h(@book.title)}」を削除しますか？この操作は取り消せません。" 
                                     } %>
                     <% end %>
                 </div>
