@@ -32,6 +32,17 @@
                         </dd>
                     <% end %>
 
+                    <% if @book.tags.any? %>
+                        <dt class="col-sm-3">タグ</dt>
+                        <dd class="col-sm-9">
+                            <ul class="list-unstyled mb-0">
+                                <% @book.tags.each do |tag| %>
+                                    <li><%= tag.name %></li>
+                                <% end %>
+                            </ul>
+                        </dd>
+                    <% end %>
+
                     <dt class="col-sm-3">在庫</dt>
                     <dd class="col-sm-9"><%= @book.stock_count.to_i > 0 ? "#{@book.stock_count}冊" : '在庫なし' %></dd>
                 </dl>
