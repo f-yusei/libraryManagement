@@ -6,6 +6,9 @@ class Book < ApplicationRecord
   has_many :users, through: :lendings
   before_validation :strip_isbn_hyphens
 
+  has_many :taggings, dependent: :destroy
+  has_many :tags, through: :taggings
+
   validates :title, presence: true
   validates :isbn, presence: true, uniqueness: true
 
