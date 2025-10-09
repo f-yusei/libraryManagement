@@ -1,6 +1,6 @@
 class BooksController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
-  admin_only only: %i[create new]
+  admin_only only: %i[create new destroy]
   def index
     @books = Book.search(params[:q])
   end
@@ -39,6 +39,21 @@ class BooksController < ApplicationController
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved => e
       flash.now[:alert] = "登録に失敗しました。 #{e.message}"
       render :new, status: :unprocessable_entity
+  end
+
+  def destroy
+    book = Book.find_by(id: params[:id])
+
+    if book.nil?
+      redirect_to root_path, flash: { danger: "本が見つかりません" }
+      return
+    end
+
+    if book.destroy
+      redirect_to root_path, flash: { success: "本の削除が完了しました。" }
+    else
+      redirect_to root_path, flash: { danger: book.errors.full_messages.join(", ") }
+    end
   end
 
   private

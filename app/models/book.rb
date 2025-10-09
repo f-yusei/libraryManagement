@@ -18,7 +18,21 @@ class Book < ApplicationRecord
       .preload(:authors)
   }
 
+  # ビジネスルール: 貸出中の本は削除できない
+  before_destroy :ensure_not_lent_out
+
+  def can_be_destroyed?
+    lendings.unreturned.empty?
+  end
+
   private
+
+  def ensure_not_lent_out
+    unless can_be_destroyed?
+      errors.add(:base, "貸出中の本は削除できません")
+      throw(:abort)
+    end
+  end
 
   def strip_isbn_hyphens
     self.isbn = isbn.delete("-") if isbn.present?

@@ -2,7 +2,18 @@
     <div class="row">
         <% if @book.present? %>
             <div class="col-12 col-lg-8">
-                <h1 class="h3 mb-3"><%= @book.title %></h1>
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="h3 mb-0"><%= @book.title %></h1>
+                    <% if admin? %>
+                        <%= button_to '削除',
+                                    book_path(@book),
+                                    method: :delete,
+                                    class: "btn btn-danger btn-sm",
+                                    data: { 
+                                        "turbo-confirm": "本当に「#{h(@book.title)}」を削除しますか？この操作は取り消せません。" 
+                                    } %>
+                    <% end %>
+                </div>
                 <dl class="row">
                     <dt class="col-sm-3">ISBN</dt>
                     <dd class="col-sm-9"><%= @book.isbn %></dd>
