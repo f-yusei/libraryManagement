@@ -1,4 +1,10 @@
 class LendingsController < ApplicationController
+  admin_only only: %i[index]
+
+  def index
+    @lendings = Lending.includes(:user, :book).all
+  end
+
   def create
     book = Book.find(params[:book_id])
     lending = Lending.lend_to(current_user, book)

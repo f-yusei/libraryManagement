@@ -1,2 +1,49 @@
-<!--このページがマイページになる -->
-<%= @user.name %>, <%= @user.email_address %>
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- ユーザー情報ヘッダー -->
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-person-circle me-2"></i>マイページ
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <dl class="row">
+                <dt class="col-sm-4">ユーザー名</dt>
+                <dd class="col-sm-8"><%= @user.name %></dd>
+                <dt class="col-sm-4">メールアドレス</dt>
+                <dd class="col-sm-8"><%= @user.email_address %></dd>
+              </dl>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-center">
+                <div class="text-center">
+                  <h3 class="h2 text-primary mb-0"><%= @user.lendings.count %></h3>
+                  <small class="text-muted">総貸出数</small>
+                </div>
+                <div class="ms-4">
+                  <h3 class="h2 text-warning mb-0"><%= @user.lendings.unreturned.count %></h3>
+                  <small class="text-muted">現在貸出中</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 貸出履歴 -->
+      <%= render "shared/lending_history", 
+                 lendings: @user.lendings, 
+                 show_user_info: false %>
+
+      <!-- ナビゲーション -->
+      <div class="mt-4">
+        <%= link_to "本を探す", books_path, class: "btn btn-primary me-2" %>
+        <%= link_to "プロフィール編集", edit_user_path(@user), class: "btn btn-outline-secondary" %>
+      </div>
+    </div>
+  </div>
+</div>

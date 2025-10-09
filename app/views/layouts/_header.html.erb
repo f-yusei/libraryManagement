@@ -16,7 +16,13 @@
             <li class="nav-item me-lg-2">
               <%= link_to "書籍登録", new_book_path, class: "btn btn-outline-light w-100 w-lg-auto mt-2 mt-lg-0 ms-lg-2" %>
             </li>
+            <li class="nav-item me-lg-2">
+              <%= link_to "貸出管理", lendings_path, class: "btn btn-outline-light w-100 w-lg-auto mt-2 mt-lg-0 ms-lg-2" %>
+            </li>
           <% end %>
+          <li class="nav-item me-lg-2">
+            <%= link_to "マイページ", current_user, class: "btn btn-outline-light w-100 w-lg-auto mt-2 mt-lg-0 ms-lg-2" %>
+          </li>
           <li class="nav-item">
             <%= button_to "サインアウト", session_path(current_user.sessions.last), method: :delete, class: "btn btn-outline-light w-100 w-lg-auto mt-2 mt-lg-0 ms-lg-2" %>
           </li>
