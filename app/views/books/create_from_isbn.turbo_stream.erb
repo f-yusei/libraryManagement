@@ -1,0 +1,21 @@
+<%= turbo_stream.replace "search_result" do %>
+  <div class="card">
+    <div class="card-body text-center text-success">
+      <div class="mb-3">
+        <i class="bi bi-check-circle-fill" style="font-size: 3rem;"></i>
+      </div>
+      <h5>登録が完了しました！</h5>
+      <p class="text-muted mb-3">
+        「<%= @book.title %>」が書籍一覧に追加されました。
+      </p>
+      <div class="text-center text-muted">
+        <i class="bi bi-book me-2"></i>
+        続けて別の書籍を検索できます
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if defined?(@show_in_list) && @show_in_list %>
+  <%= turbo_stream.prepend "books-list", partial: "books/book_card", locals: { book: @book } %>
+<% end %>

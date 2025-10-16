@@ -1,0 +1,18 @@
+<%= turbo_frame_tag "search_result" do %>
+  <div class="card">
+    <div class="card-body text-center">
+      <div class="text-danger mb-3">
+        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+      </div>
+      <h5 class="text-danger">検索結果が見つかりませんでした</h5>
+      <p class="text-muted mb-3">
+        入力されたISBN「<strong><%= @isbn %></strong>」に該当する書籍情報が見つかりませんでした。
+      </p>
+      <div class="text-muted small">
+        <p class="mb-1">• ISBNに間違いがないか確認してください</p>
+        <p class="mb-1">• ハイフンの有無は関係ありません</p>
+        <p class="mb-0">• 手動入力フォームもご利用いただけます</p>
+      </div>
+    </div>
+  </div>
+<% end %>
