@@ -1,9 +1,14 @@
 <div class="container mt-4">
     <div class="row g-3">
-        <%= form_with url: books_path, method: :get, local: true, class: "d-flex mb-3" do |f| %>
-        <%= f.text_field :q, value: params[:q], class: "form-control me-2", placeholder: "タイトル・ISBN・著者名・タグで検索" %>
-        <%= f.submit "検索", class: "btn btn-primary" %>
-        <% end %>
+    <%= form_with url: books_path, method: :get, local: true, class: "d-flex mb-3 align-items-center" do |f| %>
+    <%= f.text_field :q, value: params[:q], class: "form-control me-2", placeholder: "タイトル・ISBN・著者名・タグで検索" %>
+    <%= f.label :sort, "並び替え", class: "visually-hidden" %>
+    <%= f.select :sort,
+              options_for_select(@sort_options.map { |value, label| [label, value] }, @sort_param),
+              {},
+              class: "form-select me-2" %>
+    <%= f.submit "検索", class: "btn btn-primary" %>
+    <% end %>
         <% if @books.present? %>
             <% @books.each do |book| %>
                 <div class="col-12 col-md-6 col-lg-4">
@@ -34,4 +39,9 @@
             </div>
         <% end %>
     </div>
+    <% if @books.respond_to?(:total_pages) && @books.total_pages > 1 %>
+        <div class="d-flex justify-content-center mt-4">
+            <%= paginate @books, params: { q: params[:q], sort: @sort_param } %>
+        </div>
+    <% end %>
 </div>

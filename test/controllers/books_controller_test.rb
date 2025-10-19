@@ -58,6 +58,30 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal "貸出中の本は削除できません", flash[:danger]
   end
 
+  test "edit requires admin authentication" do
+    book = books(:one)
+
+    get edit_book_path(book)
+    assert_redirected_to new_session_path
+
+    sign_in_as(users(:one))
+    get edit_book_path(book)
+    assert_redirected_to root_path
+    assert_equal "アクセス権限がありません", flash[:danger]
+  end
+
+  test "update requires admin authentication" do
+    book = books(:one)
+
+    patch book_path(book), params: { book: { title: "更新不可" } }
+    assert_redirected_to new_session_path
+
+    sign_in_as(users(:one))
+    patch book_path(book), params: { book: { title: "更新不可" } }
+    assert_redirected_to root_path
+    assert_equal "アクセス権限がありません", flash[:danger]
+  end
+
   # 書籍作成のテスト
   test "create requires admin authentication" do
     # 未ログインユーザー
@@ -266,6 +290,87 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_includes fragment.to_html, "ISBNを入力してください。"
   end
 
+  test "GET /books paginates index results" do
+    initial_count = Book.count
+    additional = BooksController::PER_PAGE + 2
+
+    additional.times do |i|
+      book = Book.new(
+        title: "追加の書籍#{i}",
+        isbn: format("978%010d", i),
+        publisher: "テスト出版社",
+        stock_count: 1
+      )
+      book.assign_authors("著者#{i}")
+      book.save!
+    end
+
+    total_books = initial_count + additional
+
+    get books_path
+    assert_response :success
+    assert_select ".card.h-100", BooksController::PER_PAGE
+  assert_select "ul.pagination"
+
+    get books_path(page: 2)
+    assert_response :success
+    remaining = total_books - BooksController::PER_PAGE
+    assert_select ".card.h-100", remaining
+  end
+
+  test "GET /books sorts results by title when title sort parameter is given" do
+    titles = [ "ソートかきくけこ", "ソートあいうえお", "ソートさしすせそ" ]
+
+    titles.each_with_index do |title, index|
+      book = Book.new(
+        title: title,
+        isbn: format("9799000000%02d", index),
+        publisher: "テスト出版社",
+        stock_count: 1
+      )
+      book.assign_authors("ソート著者#{index}")
+      book.save!
+    end
+
+    get books_path(q: "ソート", sort: "title_asc")
+    assert_response :success
+
+    rendered_titles = css_select(".card-title a").map { |node| node.text.strip }
+    expected_order = titles.sort
+
+    assert_equal expected_order, rendered_titles.first(expected_order.size)
+  end
+
+  test "GET /books sorts results by published date descending when parameter given" do
+    dates = [ Date.new(2022, 1, 1), Date.new(2024, 4, 1), Date.new(2023, 7, 15) ]
+
+    books = dates.each_with_index.map do |date, index|
+      Book.new(
+        title: "刊行ソート#{index}",
+        isbn: format("9799100000%02d", index),
+        publisher: "テスト出版社",
+        published_date: date,
+        stock_count: 1
+      ).tap do |book|
+        book.assign_authors("刊行著者#{index}")
+        book.save!
+      end
+    end
+
+    get books_path(q: "刊行ソート", sort: "published_desc")
+    assert_response :success
+
+    rendered_titles = css_select(".card-title a").map { |node| node.text.strip }
+
+    expected_titles = books.sort_by do |book|
+      published_key = book.published_date ? -book.published_date.jd : Float::INFINITY
+      created_key = -book.created_at.to_f
+      [ published_key, created_key ]
+    end.map(&:title)
+
+    assert_equal expected_titles, rendered_titles.first(expected_titles.size)
+  end
+
   test "POST /books/create_from_isbn registers book when valid" do
     sample_response = {
       isbn: "9781234567890",
@@ -293,6 +398,50 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal sample_response[:isbn], book.isbn
     assert_equal 3, book.stock_count
     assert_equal sample_response[:authors].sort, book.authors.pluck(:name).sort
+  end
+
+  test "admin can update a book" do
+    book = books(:one)
+    sign_in_as(users(:admin))
+
+    patch book_path(book), params: {
+      book: {
+        title: "改訂版 Ruby入門",
+        isbn: book.isbn,
+        publisher: "新技術評論社",
+        stock_count: 5,
+        published_date: Date.new(2024, 4, 1)
+      },
+      author_names: "新しい著者",
+      tag_names: "プログラミング, 入門"
+    }
+
+    assert_redirected_to book_path(book)
+    assert_equal "書籍の情報を更新しました。", flash[:success]
+
+    book.reload
+    assert_equal "改訂版 Ruby入門", book.title
+    assert_equal 5, book.stock_count
+    assert_equal [ "新しい著者" ], book.authors.pluck(:name)
+    assert_equal %w[プログラミング 入門], book.tags.pluck(:name).sort
+  end
+
+  test "admin update fails without authors" do
+    book = books(:one)
+    sign_in_as(users(:admin))
+
+    patch book_path(book), params: {
+      book: {
+        title: "著者なし更新",
+        isbn: book.isbn,
+        stock_count: 2
+      },
+      author_names: "",
+      tag_names: ""
+    }
+
+    assert_response :unprocessable_entity
+    assert_template :edit
   end
 
   test "POST /books/create_from_isbn rejects invalid stock count" do
