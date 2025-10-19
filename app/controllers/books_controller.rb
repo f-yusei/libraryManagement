@@ -1,8 +1,20 @@
 class BooksController < ApplicationController
   allow_unauthenticated_access only: %i[index show]
-  admin_only only: %i[create new destroy]
+  admin_only only: %i[create new destroy edit update create_from_isbn]
+  PER_PAGE = 6
+  SORT_OPTIONS = {
+    "newest" => "新着順",
+    "title_asc" => "タイトル（あいうえお順）",
+    "published_desc" => "出版日が新しい順"
+  }.freeze
+
   def index
+    @sort_param = normalize_sort(params[:sort])
     @books = Book.search(params[:q])
+                 .yield_self { |scope| apply_sort(scope, @sort_param) }
+                 .page(params[:page])
+                 .per(PER_PAGE)
+    @sort_options = SORT_OPTIONS
   end
 
   def show
@@ -11,6 +23,20 @@ class BooksController < ApplicationController
 
   def edit
     @book = Book.find(params[:id])
+  end
+
+  def update
+    @book = Book.find(params[:id])
+    @book.assign_attributes(book_params)
+    @book.assign_authors(params[:author_names]) if params.key?(:author_names)
+    @book.assign_tags(params[:tag_names]) if params.key?(:tag_names)
+
+    if @book.save
+      redirect_to @book, flash: { success: "書籍の情報を更新しました。" }
+    else
+      flash.now[:alert] = "書籍の更新に失敗しました。"
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def new
@@ -102,7 +128,7 @@ class BooksController < ApplicationController
     @isbn = params[:isbn].to_s.strip
     validate_isbn_presence!
     stock_count = extract_stock_count(params[:stock_count])
-  ensure_book_not_registered!(@isbn)
+    ensure_book_not_registered!(@isbn)
 
     book_info = GoogleBooksService.call(@isbn)
     @book = build_book_from_info(book_info, stock_count: stock_count)
@@ -120,6 +146,34 @@ class BooksController < ApplicationController
   end
 
   private
+
+  def normalize_sort(raw_sort)
+    sort_value = raw_sort.to_s
+    SORT_OPTIONS.key?(sort_value) ? sort_value : "newest"
+  end
+
+  def apply_sort(scope, sort_key)
+    case sort_key
+    when "title_asc"
+      scope.reorder(title_sort_order)
+    when "published_desc"
+      scope.reorder(published_date: :desc, created_at: :desc)
+    else
+      scope.reorder(created_at: :desc)
+    end
+  end
+
+  def title_sort_order
+    if postgresql_adapter?
+      Arel.sql('title COLLATE "ja-x-icu" ASC, id ASC')
+    else
+      { title: :asc, id: :asc }
+    end
+  end
+
+  def postgresql_adapter?
+    ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+  end
 
   def validate_isbn_presence!
     return if @isbn.present?
