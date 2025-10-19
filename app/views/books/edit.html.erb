@@ -1,74 +1,74 @@
 <div class="container mt-4">
-	<div class="row">
-		<div class="col-md-8 offset-md-2">
-			<div class="card shadow-sm">
-				<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-					<h3 class="mb-0">書籍情報を編集</h3>
-					<%= link_to "詳細に戻る", book_path(@book), class: "btn btn-outline-light btn-sm" %>
-				</div>
-				<div class="card-body">
-					<% if @book.errors.any? %>
-						<div class="alert alert-danger">
-							<h4 class="alert-heading">更新に失敗しました。</h4>
-							<ul class="mb-0">
-								<% @book.errors.full_messages.each do |message| %>
-									<li><%= message %></li>
-								<% end %>
-							</ul>
-						</div>
-					<% end %>
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">書籍情報を編集</h3>
+          <%= link_to "詳細に戻る", book_path(@book), class: "btn btn-outline-light btn-sm" %>
+        </div>
+        <div class="card-body">
+          <% if @book.errors.any? %>
+            <div class="alert alert-danger">
+              <h4 class="alert-heading">更新に失敗しました。</h4>
+              <ul class="mb-0">
+                <% @book.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
 
-					<%= form_with model: @book, local: true do |form| %>
-						<div class="mb-3">
-							<%= form.label :title, "タイトル", class: "form-label" %>
-							<%= form.text_field :title, class: "form-control", required: true %>
-						</div>
+          <%= form_with model: @book, local: true do |form| %>
+            <div class="mb-3">
+              <%= form.label :title, "タイトル", class: "form-label" %>
+              <%= form.text_field :title, class: "form-control", required: true %>
+            </div>
 
-						<div class="row">
-							<div class="col-md-6 mb-3">
-								<%= form.label :isbn, "ISBN", class: "form-label" %>
-								<%= form.text_field :isbn, class: "form-control", required: true %>
-							</div>
-							<div class="col-md-6 mb-3">
-								<%= form.label :stock_count, "在庫数", class: "form-label" %>
-								<%= form.number_field :stock_count, class: "form-control", min: 0, required: true %>
-							</div>
-						</div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <%= form.label :isbn, "ISBN", class: "form-label" %>
+                <%= form.text_field :isbn, class: "form-control", required: true %>
+              </div>
+              <div class="col-md-6 mb-3">
+                <%= form.label :stock_count, "在庫数", class: "form-label" %>
+                <%= form.number_field :stock_count, class: "form-control", min: 0, required: true %>
+              </div>
+            </div>
 
-						<div class="mb-3">
-							<%= form.label :publisher, "出版社", class: "form-label" %>
-							<%= form.text_field :publisher, class: "form-control" %>
-						</div>
+            <div class="mb-3">
+              <%= form.label :publisher, "出版社", class: "form-label" %>
+              <%= form.text_field :publisher, class: "form-control" %>
+            </div>
 
-						<div class="mb-3">
-							<%= form.label :published_date, "出版日", class: "form-label" %>
-							<%= form.date_field :published_date, class: "form-control" %>
-						</div>
+            <div class="mb-3">
+              <%= form.label :published_date, "出版日", class: "form-label" %>
+              <%= form.date_field :published_date, class: "form-control" %>
+            </div>
 
-						<div class="mb-3">
-							<%= label_tag :author_names, "著者名（カンマ区切り）", class: "form-label" %>
-							<%= text_field_tag :author_names,
-									@book.author_names_string.presence || params[:author_names].presence || @book.authors.pluck(:name).join(", "),
-									class: "form-control",
-									required: true,
-									placeholder: "例: 夏目漱石, 太宰治" %>
-						</div>
+            <div class="mb-3">
+              <%= label_tag :author_names, "著者名（カンマ区切り）", class: "form-label" %>
+              <%= text_field_tag :author_names,
+                @book.author_names_string.presence || params[:author_names].presence || @book.authors.pluck(:name).join(", "),
+                class: "form-control",
+                required: true,
+                placeholder: "例: 夏目漱石, 太宰治" %>
+            </div>
 
-						<div class="mb-3">
-							<%= label_tag :tag_names, "タグ名（カンマ区切り）", class: "form-label" %>
-							<%= text_field_tag :tag_names,
-									@book.tag_names_string.presence || params[:tag_names] || @book.tags.pluck(:name).join(", "),
-									class: "form-control",
-									placeholder: "例: 小説, 文学" %>
-						</div>
+            <div class="mb-3">
+              <%= label_tag :tag_names, "タグ名（カンマ区切り）", class: "form-label" %>
+              <%= text_field_tag :tag_names,
+                @book.tag_names_string.presence || params[:tag_names] || @book.tags.pluck(:name).join(", "),
+                class: "form-control",
+                placeholder: "例: 小説, 文学" %>
+            </div>
 
-						<div class="d-flex justify-content-end gap-2">
-							<%= link_to "キャンセル", book_path(@book), class: "btn btn-outline-secondary" %>
-							<%= form.submit "更新する", class: "btn btn-primary" %>
-						</div>
-					<% end %>
-				</div>
-			</div>
-		</div>
-	</div>
+            <div class="d-flex justify-content-end gap-2">
+              <%= link_to "キャンセル", book_path(@book), class: "btn btn-outline-secondary" %>
+              <%= form.submit "更新する", class: "btn btn-primary" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
