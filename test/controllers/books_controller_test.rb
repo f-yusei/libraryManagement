@@ -224,12 +224,16 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     stream = css_select("turbo-stream[action='replace'][target='search_result']").first
     assert stream, "search_result turbo stream not rendered"
 
-  fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
+    fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
     assert_includes fragment.to_html, sample_response[:title]
     assert_includes fragment.to_html, sample_response[:authors].first
     assert_includes fragment.to_html, sample_response[:publisher]
     assert_includes fragment.to_html, sample_response[:isbn]
     assert_includes fragment.to_html, "登録する"
+
+    form = fragment.at_css("form[action='#{create_from_isbn_books_path}']")
+    assert form, "create_from_isbn form not found"
+    assert_equal "_top", form["data-turbo-frame"]
   end
 
   test "GET /books/search_isbn renders not found partial when service raises" do
@@ -243,22 +247,94 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     stream = css_select("turbo-stream[action='replace'][target='search_result']").first
     assert stream, "search_result turbo stream not rendered"
 
-  fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
+    fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
     assert_includes fragment.to_html, "検索結果が見つかりませんでした"
     assert_includes fragment.to_html, "9781234567890"
   end
 
   test "GET /books/search_isbn renders error partial when isbn blank" do
-  sign_in_as(users(:admin))
+    sign_in_as(users(:admin))
 
-  get search_isbn_books_path(isbn: ""), as: :turbo_stream
+    get search_isbn_books_path(isbn: ""), as: :turbo_stream
 
     assert_response :success
     stream = css_select("turbo-stream[action='replace'][target='search_result']").first
     assert stream, "search_result turbo stream not rendered"
 
-  fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
+    fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
     assert_includes fragment.to_html, "検索に失敗しました"
     assert_includes fragment.to_html, "ISBNを入力してください。"
+  end
+
+  test "POST /books/create_from_isbn registers book when valid" do
+    sample_response = {
+      isbn: "9781234567890",
+      title: "Sample Title",
+      authors: [ "Author One", "Author Two" ],
+      publisher: "Sample Publisher",
+      published_date: Date.new(2024, 5, 1)
+    }
+
+    sign_in_as(users(:admin))
+
+    GoogleBooksService.stub(:call, ->(_isbn) { sample_response }) do
+      assert_difference("Book.count", 1) do
+        assert_difference("Author.count", 2) do
+          post create_from_isbn_books_path,
+               params: { isbn: sample_response[:isbn], stock_count: 3 },
+               headers: { "Turbo-Frame" => "_top" }
+        end
+      end
+    end
+
+    book = Book.order(:created_at).last
+    assert_redirected_to book_path(book)
+    assert_equal "書籍が正常に登録されました。", flash[:success]
+    assert_equal sample_response[:isbn], book.isbn
+    assert_equal 3, book.stock_count
+    assert_equal sample_response[:authors].sort, book.authors.pluck(:name).sort
+  end
+
+  test "POST /books/create_from_isbn rejects invalid stock count" do
+    sign_in_as(users(:admin))
+
+    GoogleBooksService.stub(:call, ->(_isbn) { flunk "GoogleBooksService should not be called" }) do
+      post create_from_isbn_books_path,
+           params: { isbn: "9781234567890", stock_count: 0 },
+           headers: { "Turbo-Frame" => "_top" }
+    end
+
+    assert_response :unprocessable_entity
+    assert_template :new
+  assert_equal "在庫数は1以上の整数で入力してください。", flash[:alert]
+  end
+
+  test "POST /books/create_from_isbn rejects duplicate isbn" do
+    sign_in_as(users(:admin))
+    existing_isbn = books(:one).isbn
+
+    GoogleBooksService.stub(:call, ->(_isbn) { flunk "GoogleBooksService should not be called" }) do
+      post create_from_isbn_books_path,
+           params: { isbn: "#{existing_isbn[0..2]}-#{existing_isbn[3..]}" },
+           headers: { "Turbo-Frame" => "_top" }
+    end
+
+    assert_response :unprocessable_entity
+    assert_template :new
+  assert_equal "このISBNの書籍は既に登録されています。", flash[:alert]
+  end
+
+  test "POST /books/create_from_isbn handles service not found error" do
+    sign_in_as(users(:admin))
+
+    GoogleBooksService.stub(:call, ->(_isbn) { raise Exceptions::ExternalServiceRecordNotFoundError.new("見つかりませんでした") }) do
+      post create_from_isbn_books_path,
+           params: { isbn: "9781234567890", stock_count: 1 },
+           headers: { "Turbo-Frame" => "_top" }
+    end
+
+    assert_response :not_found
+    assert_template :new
+    assert_equal "見つかりませんでした", flash[:alert]
   end
 end

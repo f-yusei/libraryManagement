@@ -39,7 +39,7 @@
       </div>
 
       <div class="border-top pt-3 mt-3">
-        <%= form_with url: create_from_isbn_books_path, method: :post, local: false do |form| %>
+  <%= form_with url: create_from_isbn_books_path, method: :post, local: false, data: { turbo_frame: "_top" } do |form| %>
           <div class="row align-items-end">
             <div class="col-6">
               <%= form.label :stock_count, "在庫数", class: "form-label fw-bold" %>
