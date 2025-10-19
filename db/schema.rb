@@ -10,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_09_162818) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_19_120000) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "authors", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -18,8 +21,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_09_162818) do
   end
 
   create_table "book_authors", force: :cascade do |t|
-    t.integer "book_id", null: false
-    t.integer "author_id", null: false
+    t.bigint "book_id", null: false
+    t.bigint "author_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["author_id"], name: "index_book_authors_on_author_id"
@@ -29,18 +32,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_09_162818) do
   create_table "books", force: :cascade do |t|
     t.string "title", null: false
     t.string "isbn", null: false
-    t.date "published_year"
+    t.date "published_date"
     t.string "publisher"
     t.integer "stock_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "image_url"
     t.index ["isbn"], name: "index_books_on_isbn", unique: true
     t.index ["title"], name: "index_books_on_title"
   end
 
   create_table "lendings", force: :cascade do |t|
-    t.integer "book_id", null: false
-    t.integer "user_id", null: false
+    t.bigint "book_id", null: false
+    t.bigint "user_id", null: false
     t.datetime "checked_out_at", null: false
     t.datetime "returned_at"
     t.datetime "due_date", null: false
@@ -59,9 +63,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_09_162818) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "solid_cache_entries", force: :cascade do |t|
+    t.binary "key", null: false
+    t.binary "value", null: false
+    t.datetime "created_at", null: false
+    t.bigint "key_hash", null: false
+    t.integer "byte_size", null: false
+    t.index ["byte_size"], name: "index_solid_cache_entries_on_byte_size"
+    t.index ["key_hash", "byte_size"], name: "index_solid_cache_entries_on_key_hash_and_byte_size"
+    t.index ["key_hash"], name: "index_solid_cache_entries_on_key_hash", unique: true
+  end
+
   create_table "taggings", force: :cascade do |t|
-    t.integer "book_id", null: false
-    t.integer "tag_id", null: false
+    t.bigint "book_id", null: false
+    t.bigint "tag_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["book_id"], name: "index_taggings_on_book_id"

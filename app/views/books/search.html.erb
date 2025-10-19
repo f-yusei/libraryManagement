@@ -1,0 +1,23 @@
+<%= turbo_frame_tag "search_result" do %>
+  <% if @result.present? %>
+    <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+      <% if @result[:thumbnail].present? %>
+        <img src="<%= @result[:thumbnail] %>" alt="thumb" width="96" height="144">
+      <% end %>
+      <div>
+        <h3><%= @result[:title] %></h3>
+        <p><%= Array(@result[:authors]).join(", ") %></p>
+
+        <!-- 在庫数を入力して初めてDB登録 -->
+        <%= form_with url: admin_books_path, method: :post do |f| %>
+          <%= hidden_field_tag :isbn, @result[:isbn13] %>
+          <label>在庫数</label>
+          <%= number_field_tag :stock_count, 1, min: 0 %>
+          <%= f.submit "この本を登録する" %>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="alert">該当する書籍が見つかりませんでした。</div>
+  <% end %>
+<% end %>

@@ -1,0 +1,61 @@
+<%= turbo_frame_tag "search_result" do %>
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">
+        <i class="bi bi-check-circle-fill text-success me-2"></i>
+        検索結果
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <% if book_info[:image_url].present? %>
+          <div class="col-md-3">
+            <img src="<%= book_info[:image_url] %>"
+                 alt="<%= book_info[:title] %>の表紙"
+                 class="img-fluid rounded shadow-sm"
+                 style="max-height: 200px;">
+          </div>
+          <div class="col-md-9">
+        <% else %>
+          <div class="col-12">
+        <% end %>
+            <dl class="row">
+              <dt class="col-sm-3">タイトル</dt>
+              <dd class="col-sm-9"><%= book_info[:title] %></dd>
+
+              <dt class="col-sm-3">著者</dt>
+              <dd class="col-sm-9"><%= Array(book_info[:authors]).presence&.join(", ") || "不明" %></dd>
+
+              <dt class="col-sm-3">出版社</dt>
+              <dd class="col-sm-9"><%= book_info[:publisher] || "不明" %></dd>
+
+              <dt class="col-sm-3">出版年</dt>
+              <dd class="col-sm-9"><%= book_info[:published_date] || "不明" %></dd>
+
+              <dt class="col-sm-3">ISBN</dt>
+              <dd class="col-sm-9"><%= book_info[:isbn] %></dd>
+            </dl>
+          </div>
+      </div>
+
+      <div class="border-top pt-3 mt-3">
+  <%= form_with url: create_from_isbn_books_path, method: :post, local: false, data: { turbo_frame: "_top" } do |form| %>
+          <div class="row align-items-end">
+            <div class="col-6">
+              <%= form.label :stock_count, "在庫数", class: "form-label fw-bold" %>
+              <%= form.number_field :stock_count, class: "form-control", min: 1, value: 1, required: true %>
+            </div>
+            <div class="col-6">
+              <%= form.hidden_field :isbn, value: book_info[:isbn] %>
+              <%= form.submit "登録する", class: "btn btn-success w-100",
+                  data: {
+                    confirm: "「#{book_info[:title]}」を登録しますか？",
+                    disable_with: "登録中..."
+                  } %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
