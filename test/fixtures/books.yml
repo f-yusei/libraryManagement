@@ -1,13 +1,13 @@
 one:
   title: "Ruby入門"
   isbn: "9784123456011"
-  published_year: 2024-04-01
+  published_date: 2024-04-01
   publisher: "技術評論社"
   stock_count: 1
 
 two:
   title: "Rails実践ガイド"
   isbn: "9784123456028"
-  published_year: 2023-07-15
+  published_date: 2023-07-15
   publisher: "オライリージャパン"
   stock_count: 1

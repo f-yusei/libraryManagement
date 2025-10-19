@@ -202,4 +202,63 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal existing_author, book.authors.first
     assert_equal existing_tag, book.tags.first
   end
+
+  test "GET /books/search_isbn returns turbo stream with search result" do
+    sample_response = {
+      isbn: "9781234567890",
+      title: "Sample Title",
+      authors: [ "Author One" ],
+      publisher: "Sample Publisher",
+      published_date: Date.new(2024, 1, 1),
+      image_url: "https://example.com/thumb.jpg"
+    }
+
+    sign_in_as(users(:admin))
+
+    GoogleBooksService.stub(:call, ->(_isbn) { sample_response }) do
+      get search_isbn_books_path(isbn: sample_response[:isbn]), as: :turbo_stream
+    end
+
+    assert_response :success
+    assert_equal "text/vnd.turbo-stream.html", @response.media_type
+    stream = css_select("turbo-stream[action='replace'][target='search_result']").first
+    assert stream, "search_result turbo stream not rendered"
+
+  fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
+    assert_includes fragment.to_html, sample_response[:title]
+    assert_includes fragment.to_html, sample_response[:authors].first
+    assert_includes fragment.to_html, sample_response[:publisher]
+    assert_includes fragment.to_html, sample_response[:isbn]
+    assert_includes fragment.to_html, "登録する"
+  end
+
+  test "GET /books/search_isbn renders not found partial when service raises" do
+    sign_in_as(users(:admin))
+
+    GoogleBooksService.stub(:call, ->(_isbn) { raise Exceptions::ExternalServiceRecordNotFoundError.new }) do
+      get search_isbn_books_path(isbn: "9781234567890"), as: :turbo_stream
+    end
+
+    assert_response :success
+    stream = css_select("turbo-stream[action='replace'][target='search_result']").first
+    assert stream, "search_result turbo stream not rendered"
+
+  fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
+    assert_includes fragment.to_html, "検索結果が見つかりませんでした"
+    assert_includes fragment.to_html, "9781234567890"
+  end
+
+  test "GET /books/search_isbn renders error partial when isbn blank" do
+  sign_in_as(users(:admin))
+
+  get search_isbn_books_path(isbn: ""), as: :turbo_stream
+
+    assert_response :success
+    stream = css_select("turbo-stream[action='replace'][target='search_result']").first
+    assert stream, "search_result turbo stream not rendered"
+
+  fragment = Nokogiri::HTML::DocumentFragment.parse(stream.inner_html)
+    assert_includes fragment.to_html, "検索に失敗しました"
+    assert_includes fragment.to_html, "ISBNを入力してください。"
+  end
 end

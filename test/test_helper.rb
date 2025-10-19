@@ -1,6 +1,9 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
+require "minitest/mock"
+require "date"
+require "nokogiri"
 
 module ActiveSupport
   class TestCase

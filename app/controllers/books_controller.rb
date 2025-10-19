@@ -46,9 +46,61 @@ class BooksController < ApplicationController
     end
   end
 
+  def search_isbn
+    @isbn = params[:isbn].to_s.strip
+    raise Exceptions::ValidationError.new("ISBNを入力してください。") if @isbn.blank?
+
+    book_info = GoogleBooksService.call(@isbn)
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "search_result",
+          partial: "books/search_result",
+          locals: { book_info: book_info }
+        )
+      end
+      format.html do
+        @book = Book.new
+        @book_info = book_info
+        render :new
+      end
+    end
+  rescue Exceptions::ExternalServiceRecordNotFoundError => e
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "search_result",
+          partial: "books/search_not_found",
+          locals: { isbn: @isbn }
+        )
+      end
+      format.html do
+        @book = Book.new
+        flash.now[:alert] = e.message
+        render :new, status: :not_found
+      end
+    end
+  rescue Exceptions::ApplicationError => e
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "search_result",
+          partial: "books/search_error",
+          locals: { error_message: e.message }
+        )
+      end
+      format.html do
+        @book = Book.new
+        flash.now[:alert] = e.message
+        render :new, status: e.status
+      end
+    end
+  end
+
   private
 
   def book_params
-    params.require(:book).permit(:title, :isbn, :published_year, :publisher, :stock_count)
+    params.require(:book).permit(:title, :isbn, :published_date, :publisher, :stock_count)
   end
 end
