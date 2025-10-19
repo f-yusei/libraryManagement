@@ -310,7 +310,7 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     get books_path
     assert_response :success
     assert_select ".card.h-100", BooksController::PER_PAGE
-  assert_select "ul.pagination"
+    assert_select "ul.pagination"
 
     get books_path(page: 2)
     assert_response :success
