@@ -371,6 +371,27 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal expected_titles, rendered_titles.first(expected_titles.size)
   end
 
+  test "title sort order uses Japanese collation on PostgreSQL" do
+    controller = BooksController.new
+
+    order_expression = controller.stub(:postgresql_adapter?, true) do
+      controller.send(:title_sort_order)
+    end
+
+    assert_kind_of Arel::Nodes::SqlLiteral, order_expression
+    assert_equal 'title COLLATE "ja-x-icu" ASC, id ASC', order_expression.to_s
+  end
+
+  test "title sort order falls back to plain ordering on non PostgreSQL" do
+    controller = BooksController.new
+
+    order_expression = controller.stub(:postgresql_adapter?, false) do
+      controller.send(:title_sort_order)
+    end
+
+    assert_equal({ title: :asc, id: :asc }, order_expression)
+  end
+
   test "POST /books/create_from_isbn registers book when valid" do
     sample_response = {
       isbn: "9781234567890",
